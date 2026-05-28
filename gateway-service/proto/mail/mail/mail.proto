@@ -1,0 +1,30 @@
+syntax = "proto3";
+package mail;
+import "proto/google/api/annotations.proto";
+option go_package = "proto/mail/mail";
+
+service MailService {
+  rpc SendEmail(SendEmailRequest) returns (SendEmailResponse) {
+    option (google.api.http) = {
+      post:"/api/v1/mail/send"
+      body:"*"
+    };
+  }
+}
+
+
+message SendEmailRequest {
+  repeated string sendTo = 1;
+  repeated string ccTo = 2;
+  string title = 3;
+  string body = 4;
+  string param = 5;
+}
+
+
+
+message SendEmailResponse {
+  bool isError = 1;
+  string errorMessage = 2;
+  int32 errorCode = 3;
+}

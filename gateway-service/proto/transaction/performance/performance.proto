@@ -1,0 +1,103 @@
+syntax = "proto3";
+package performance;
+option go_package = "proto/transaction/performance";
+import "proto/google/api/annotations.proto";
+
+
+
+service PerformanceService {
+  rpc GetEmployeePerformanceSummary(GetEmployeePerformanceSummaryRequest) returns (GetEmployeePerformanceSummaryResponse) {
+    option (google.api.http) = {
+      get:"/api/v1/transaction/employee-performance-summary"
+    };
+  }
+  rpc GetEmployeePerformanceSummaryByEmployeeID(GetEmployeePerformanceRequest) returns (GetEmployeePerformanceSummaryResponse) {
+    option (google.api.http) = {
+      get:"/api/v1/transaction/employee-performance-summary/{id}"
+    };
+  }
+  rpc GetEmployeePerformanceList(GetEmployeePerformanceRequest) returns (GetEmployeePerformanceResponse) {
+    option (google.api.http) = {
+      get:"/api/v1/transaction/employee-performance"
+    };
+  }
+  rpc GetEmployeePerformanceDetail(GetEmployeePerformanceRequest) returns (GetEmployeePerformanceResponse) {
+    option (google.api.http) = {
+      get:"/api/v1/transaction/employee-performance/{id}"
+    };
+  }
+  rpc GetEmployeePerformanceListExport(GetEmployeePerformanceRequest) returns (GetEmployeePerformanceExportResponse) {
+    option (google.api.http) = {
+      get:"/api/v1/transaction/employee-performance-export"
+    };
+  }
+  rpc GetEmployeePerformanceDetailExport(GetEmployeePerformanceRequest) returns (GetEmployeePerformanceExportResponse) {
+    option (google.api.http) = {
+      get:"/api/v1/transaction/employee-performance-export/{id}"
+    };
+  }
+}
+
+
+message GetEmployeePerformanceRequest {
+  int32 skip = 1;
+  int32 take = 2;
+  string filter = 3;
+  string sort = 4;
+  string event_type= 5 [json_name = "event_type"] ;
+  string id = 6 [json_name="id"];
+}
+
+message GetEmployeePerformanceSummaryRequest {
+  int32 periode = 1 [json_name="periode"];
+  string department_id = 2 [json_name="department_id"];
+  string outsource_id = 3 [json_name="outsource_id"];
+}
+message GetEmployeePerformanceSummaryResponse {
+  bool isError = 1;
+  string errorMessage = 2;
+  int32 errorCode = 3;
+  PerformanceSummaryModel data = 4;
+}
+
+message PerformanceSummaryModel {
+  int32 all_data = 1 [json_name="all_data"];
+  int32 upgrade = 2 [json_name="upgrade"];
+  int32 stable = 3 [json_name="stable"];
+  int32 underperform = 4 [json_name="underperform"];
+  int32 downgrade = 5 [json_name="downgrade"];  
+}
+
+message EmptyRequest {}
+
+message GetEmployeePerformanceResponse {
+  bool isError = 1;
+  string errorMessage = 2;
+  int32 errorCode = 3;
+  repeated PerformanceModel data = 4; 
+  int32 countData = 5;
+}
+
+message PerformanceModel{
+  string nik = 1 [json_name="nik"];
+  string employee_id = 2 [json_name="employee_id"];
+  string employee_name = 3 [json_name="employee_name"];
+  string department_name = 4 [json_name="department_name"];
+  string outsource_name = 5 [json_name="outsource_name"];  
+  string predicate = 6 [json_name="predicate"];   
+  string score = 7 [json_name="score"];   
+  string description = 8 [json_name="description"];   
+  string periode = 9 [json_name="periode"];   
+}
+
+message GetEmployeePerformanceExportResponse {
+  bool isError = 1;
+  string errorMessage = 2;
+  int32 errorCode = 3;
+  ExportResponse data = 4;
+}
+message ExportResponse {
+  bytes file_content = 1; 
+  string file_name = 2;   
+  string mime_type = 3;   
+}

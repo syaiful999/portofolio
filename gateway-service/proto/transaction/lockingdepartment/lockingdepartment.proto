@@ -1,0 +1,91 @@
+syntax = "proto3";
+package lockingdepartment;
+import "google/protobuf/timestamp.proto";
+import "proto/google/api/annotations.proto";
+option go_package = "proto/transaction/lockingdepartment";
+
+service LockingDepartmentService {
+    rpc GetLockingDepartments(GetLockingDepartmentRequest) returns (GetLockingDepartmentResponse) {
+        option (google.api.http) = {
+          get: "/api/v1/transaction/locking-department"
+        };
+      }
+      rpc GetLockingDepartmentById(GetLockingDepartmentByIDRequest) returns (GetLockingDepartmentByIDResponse) {
+        option (google.api.http) = {
+          get: "/api/v1/transaction/locking-department/{id}"
+        };
+      }
+    rpc CreateLockingDepartment(MutationLockingDepartmentRequest) returns (MutationLockingDepartmentResponse) {
+        option (google.api.http) = {
+          post:"/api/v1/transaction/locking-department"
+          body:"*"
+        };
+      }
+      rpc UpdateLockingDepartment(MutationLockingDepartmentRequest) returns(MutationLockingDepartmentResponse) {
+        option (google.api.http) = {
+          put:"/api/v1/transaction/locking-department/{id}"
+          body:"*"
+        };
+      }
+      rpc DeleteLockingDepartment(MutationLockingDepartmentRequest) returns(MutationLockingDepartmentResponse) {
+        option (google.api.http) = {
+          delete:"/api/v1/transaction/locking-department/{id}"
+        };
+      }
+}
+
+message LockingDepartmentModel {
+   string id = 1;  
+  google.protobuf.Timestamp created_date = 2 [json_name = "created_date"];
+  string created_by = 3 [json_name = "created_by"];
+  google.protobuf.Timestamp modified_date = 4 [json_name = "modified_date"];
+  string modified_by = 5 [json_name = "modified_by"];
+  string reader_name = 6 [json_name = "reader_name"];
+  string reader_ip = 7 [json_name = "reader_ip"];
+  string reader_id = 8 [json_name = "reader_id"];
+  string minipc_name = 9 [json_name = "minipc_name"];
+  string minipc_ip = 10 [json_name = "minipc_ip"];
+  string location_name = 11 [json_name = "location_name"];
+  string department_id = 12 [json_name = "department_id"];
+  string department_name = 13 [json_name = "department_name"];
+  string fr_name = 14 [json_name = "fr_name"];
+  string fr_ip = 15 [json_name = "fr_ip"];
+}
+
+message GetLockingDepartmentRequest {
+  int32 skip = 1;
+  int32 take = 2;
+  string filter = 3;
+  string sort = 4;
+}
+
+message GetLockingDepartmentByIDRequest {
+  string id = 1;
+}
+
+message MutationLockingDepartmentRequest {
+  string id = 1;  
+  string reader_id = 2 [json_name = "reader_id"];
+  string department_id = 3 [json_name = "department_id"];
+}
+
+
+message GetLockingDepartmentResponse {
+  bool isError = 1;
+  string errorMessage = 2;
+  int32 errorCode = 3;
+  repeated LockingDepartmentModel data = 4;
+  int32 countData = 5;
+}
+message GetLockingDepartmentByIDResponse {
+  bool isError = 1;
+  string errorMessage = 2;
+  int32 errorCode = 3;
+  LockingDepartmentModel data = 4;
+}
+message MutationLockingDepartmentResponse {
+  bool isError = 1;
+  string errorMessage = 2;
+  int32 errorCode = 3;
+  GetLockingDepartmentByIDRequest data = 4;
+}

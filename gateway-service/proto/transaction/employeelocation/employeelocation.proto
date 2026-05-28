@@ -1,0 +1,132 @@
+syntax = "proto3";
+package employeelocation;
+import "google/protobuf/timestamp.proto";
+option go_package = "proto/transaction/employeelocation";
+import "proto/google/api/annotations.proto";
+
+service EmployeeLocationService {
+  rpc GetEmployeeLocations(GetEmployeeLocationRequest) returns (GetEmployeeLocationResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/transaction/employee-location"
+    };
+  }
+  rpc GetEmployeeLocationById(GetEmployeeLocationByIDRequest) returns (GetEmployeeLocationByIDResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/transaction/employee-location/{id}"
+    };
+  }
+
+  rpc GetEmployeeDetailById(GetEmployeeLocationByIDRequest) returns (GetEmployeeDetailByIDResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/transaction/employee-detail/{id}"
+    };
+  }
+  rpc SyncFaceRecognitionData(SyncDataRequest) returns (SyncDataResponse) {
+    option (google.api.http) = {
+      post:"/api/v1/transaction/sync-employee-biometric"
+      body:"*"
+    };
+  }
+  rpc GetFaceRecognitionImage(SyncDataRequest) returns (SyncDataResponse) {
+    option (google.api.http) = {
+      post:"/api/v1/transaction/get-employee-biometric"
+      body:"*"
+    };
+  }
+  rpc ReSyncFaceRecognitionData(SyncDataRequest) returns (SyncDataResponse) {
+    option (google.api.http) = {
+      post:"/api/v1/transaction/resync-employee-biometric"
+      body:"*"
+    };
+  }
+}
+
+message EmployeeLocationModel {
+  string id = 1;  
+  string employee_name = 2 [json_name = "employee_name"];
+  string nik = 3 [json_name = "nik"];
+  string picture = 4 [json_name = "picture"];
+  string department_name = 5 [json_name = "department_name"];
+  string department_id = 6 [json_name = "department_id"];
+  string join_date = 7 [json_name = "join_date"];
+  google.protobuf.Timestamp created_date = 8 [json_name = "created_date"];
+  string created_by = 9 [json_name = "created_by"];
+  google.protobuf.Timestamp modified_date = 10 [json_name = "modified_date"];
+  string modified_by = 11 [json_name = "modified_by"];
+  string modified_by_email = 12 [json_name = "modified_by_email"];
+  bool is_active = 13 [json_name = "is_active"];
+  string npwp = 14 [json_name = "npwp"];
+  string noktp = 15 [json_name = "noktp"];
+  string position = 16 [json_name = "position"];
+  string outsource_name = 17 [json_name = "outsource_name"];
+  string outsource_id = 18 [json_name = "outsource_id"];
+  string section_name = 19 [json_name = "section_name"];
+  string section_id = 20 [json_name = "section_id"];
+  string department_detail_name = 21 [json_name = "department_detail_name"];
+  string department_detail_id = 22 [json_name = "department_detail_id"];
+  bool is_success = 23 [json_name = "is_success"];
+  google.protobuf.Timestamp latest_sync = 24 [json_name = "latest_sync"];
+}
+
+message EmployeeDetailModel {
+  string id = 1 [json_name = "reader_id"];
+  string ip_address = 2 [json_name = "fr_ip"];
+  string name = 3 [json_name = "fr_name"];
+  bool is_success = 4 [json_name = "is_success"];
+  google.protobuf.Timestamp latest_sync = 5 [json_name = "created_date"];
+  string updated_by = 6 [json_name = "created_by"];
+  bool ping_status = 7 [json_name = "ping_status"];
+  bool fingerprint_status = 8 [json_name = "fingerprint_status"];
+}
+
+
+message GetEmployeeLocationRequest {
+  int32 skip = 1;
+  int32 take = 2;
+  string filter = 3;
+  string sort = 4;
+}
+
+message GetEmployeeLocationByIDRequest {
+  string id = 1;
+}
+
+message SyncDataRequest {
+  string id = 1;
+  string ip_address = 2;
+  bool is_ho_data = 3;
+}
+
+message GetEmployeeLocationResponse {
+  bool isError = 1;
+  string errorMessage = 2;
+  int32 errorCode = 3;
+  repeated EmployeeLocationModel data = 4;
+  int32 countData = 5;
+}
+message GetEmployeeLocationByIDResponse {
+  bool isError = 1;
+  string errorMessage = 2;
+  int32 errorCode = 3;
+  EmployeeLocationModel data = 4;
+}
+
+
+message GetEmployeeDetailByIDResponse {
+  bool isError = 1;
+  string errorMessage = 2;
+  int32 errorCode = 3;
+  DataDetailModel data = 4;
+}
+
+message DataDetailModel {
+  repeated EmployeeDetailModel data = 1;
+  EmployeeLocationModel employeeData = 2;
+}
+
+message SyncDataResponse {
+  bool isError = 1;
+  string errorMessage = 2;
+  int32 errorCode = 3;
+  string data = 4;
+}

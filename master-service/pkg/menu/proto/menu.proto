@@ -1,0 +1,51 @@
+syntax = "proto3";
+package menu;
+option go_package = "pkg/menu/proto";
+import "google/protobuf/timestamp.proto";
+
+
+service MenuService {
+  rpc GetMenu(GetMenuRequest) returns (GetMenuResponse) {}
+  rpc GetMenuByID(GetMenuByIDRequest) returns (GetMenuByIDResponse) {}
+}
+// model
+message MenuModel {
+  string id = 1;
+  string menu_code = 2 [json_name = "menu_code"];
+  string menu_description = 3 [json_name = "menu_description"];
+  string menu_path = 4 [json_name = "menu_path"];  
+  bool is_active = 5 [json_name = "is_active"];
+  string created_by = 6 [json_name = "created_by"]; 
+  google.protobuf.Timestamp created_date = 7 [json_name = "created_date"];
+  string modified_by = 8 [json_name = "modified_by"]; 
+  google.protobuf.Timestamp modified_date = 9 [json_name = "modified_date"];
+  string id_parent = 10 [json_name = "id_parent"];
+  int32 level = 11 [json_name = "level"];
+  repeated MenuModel children = 12 [json_name = "children"];
+}
+
+// Req.
+message GetMenuRequest {
+  int32 skip = 1;
+  int32 take = 2;
+  string filter = 3;
+  string sort = 4;
+}
+message GetMenuByIDRequest {
+  string id = 1;
+}
+
+// Res.
+message GetMenuResponse {
+  bool isError = 1;
+  string errorMessage = 2;
+  int32 errorCode = 3;
+  repeated MenuModel data = 4;
+  int32 countData = 5;
+}
+message GetMenuByIDResponse {
+  bool isError = 1;
+  string errorMessage = 2;
+  int32 errorCode = 3;
+  MenuModel data = 4;
+}

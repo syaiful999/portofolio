@@ -1,0 +1,24 @@
+--- 
+config:
+  service:
+    name: "xti-roles-service-go"   
+    version: 1.0.0
+    address: localhost 
+    port: 8095
+  hosts: 
+    cache: 
+      address: "10.0.0.2"
+      port: 6379
+    database: 
+      address: "localhost"
+      name: penduduk
+      driver: postgre
+      password: root
+      port: 5432
+      username: postgres
+    broker:
+      driver: "nats"
+      address: "127.0.0.1"
+      port: 4222
+      username: "root"
+      password: ""

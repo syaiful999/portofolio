@@ -1,0 +1,144 @@
+syntax = "proto3";
+package fileshare;
+import "google/protobuf/timestamp.proto";
+import "proto/google/api/annotations.proto";
+option go_package = "proto/transaction/fileshare";
+
+service FileShareService {
+    rpc GetFileShare(GetFileShareRequest) returns (GetFileShareResponse) {
+        option (google.api.http) = {
+          get: "/api/v1/transaction/file-share"
+        };
+      }
+      
+    rpc GetFolderShare(GetFolderShareRequest) returns (GetFileShareResponse) {
+        option (google.api.http) = {
+          get: "/api/v1/transaction/folder-share"
+        };
+      }
+
+    rpc CreateFileShare(MutationFileShareRequest) returns (MutationFileShareResponse) {
+        option (google.api.http) = {
+          post:"/api/v1/transaction/file-share"
+          body:"*"
+        };
+      }
+      
+    rpc UploadFileShare(MutationFileRequest) returns (MutationFileShareResponse) {
+        option (google.api.http) = {
+          post:"/api/v1/transaction/file-share/upload"
+          body:"*"
+        };
+      }
+
+    rpc UpdateFileShare(MutationFileShareRequest) returns (MutationFileShareResponse) {
+        option (google.api.http) = {
+          put:"/api/v1/transaction/file-share/{id}"
+          body:"*"
+        };
+      }
+      
+      rpc DeleteFileShare(MutationFileShareRequest) returns(MutationFileShareResponse) {
+        option (google.api.http) = {
+          delete:"/api/v1/transaction/file-share/{id}"
+        };
+      }
+}
+
+
+message FileShareModel {
+  string id = 1;  
+  bool is_active = 2 [json_name = "is_active"];
+  string created_by = 3 [json_name = "created_by"]; 
+  google.protobuf.Timestamp created_date = 4 [json_name = "created_date"];
+  string modified_by = 5 [json_name = "modified_by"]; 
+  google.protobuf.Timestamp modified_date = 6 [json_name = "modified_date"];
+  string user_id = 7 [json_name = "user_id"];
+  string user_name = 8 [json_name = "user_name"];
+  string name = 9 [json_name = "name"];
+  string email = 10 [json_name = "email"];
+  string picture = 11 [json_name = "picture"];
+  bool is_write = 12 [json_name = "is_write"];
+  string file_name = 13 [json_name = "file_name"];
+  string file_size = 14 [json_name = "file_size"];
+  string file_id = 15 [json_name = "file_id"];
+  string file_url = 16 [json_name = "file_url"];
+  string is_parent = 17 [json_name = "is_parent"];
+  string parent_id = 18 [json_name = "parent_id"];
+}
+
+
+
+message FileModel {
+  string id = 1;  
+  bool is_active = 2 [json_name = "is_active"];
+  string created_by = 3 [json_name = "created_by"]; 
+  google.protobuf.Timestamp created_date = 4 [json_name = "created_date"];
+  string modified_by = 5 [json_name = "modified_by"]; 
+  google.protobuf.Timestamp modified_date = 6 [json_name = "modified_date"];
+  string file_id =  7 [json_name = "file_id"];
+  string file_name =  8 [json_name = "file_name"];
+  string file_url =  9 [json_name = "file_url"];
+  string file_size =  10 [json_name = "file_size"];
+  string level = 11  [json_name = "level"];
+  bool is_parent =  12 [json_name = "is_parent"];
+  string parent_id =  13 [json_name = "parent_id"];
+  string owner_name = 14 [json_name = "owner_name"];
+  repeated FileShareModel share_to = 15 [json_name = "share_to"];
+}
+
+
+message GetFileShareRequest {
+  int32 skip = 1;
+  int32 take = 2;
+  string filter = 3;
+  string sort = 4;
+}
+
+message GetFolderShareRequest {
+  int32 skip = 1;
+  int32 take = 2;
+  string filter = 3;
+  string sort = 4;
+  string parent_id = 5;
+}
+
+message MutationFileShareRequest {
+  string id = 1 [json_name = "id"];
+  string file_id = 2 [json_name = "file_id"];
+  string user_id = 3 [json_name = "user_id"];
+  string file_name = 4 [json_name = "file_name"];
+  string user_name = 5 [json_name = "user_name"];
+  bool is_write = 6 [json_name = "is_write"];
+}
+
+message MutationFileRequest {
+  string id = 1 [json_name = "id"];  
+  string file_name = 2 [json_name = "file_name"];
+  string file_url = 3 [json_name = "file_url"];
+  int32 file_size = 4 [json_name = "file_size"];
+  int32 level = 5 [json_name = "level"];
+  bool is_parent = 6 [json_name = "is_parent"];
+  string parent_id = 7 [json_name = "parent_id"];
+  string owner_id = 8 [json_name = "owner_id"];
+}
+
+
+message GetFileShareResponse {
+  bool isError = 1;
+  string errorMessage = 2;
+  int32 errorCode = 3;
+  repeated FileModel data = 4;
+  int32 countData = 5;
+}
+
+message MutationFileShareResponse {
+  bool isError = 1;
+  string errorMessage = 2;
+  int32 errorCode = 3;
+  GetFileShareByIDResponse data = 4;
+}
+
+message GetFileShareByIDResponse {
+  string id = 1;
+}

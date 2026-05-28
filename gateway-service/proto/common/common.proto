@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+package common;
+
+option go_package = "moyo-gateway-service/proto/common";
+
+message FetchRequest {
+    int64 Limit = 1;
+    int64 Offset = 2;
+    string SortBy = 3;
+    string Sort = 4;
+    string Keyword = 5;
+}
+
+message FindByIDRequest {
+    string ID = 1;
+}
+
+message Response {
+    bool IsSuccess = 1;
+    string Message = 2;
+    int64 Status = 3;
+}

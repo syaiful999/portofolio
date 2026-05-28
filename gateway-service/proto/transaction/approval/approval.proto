@@ -1,0 +1,226 @@
+syntax = "proto3";
+package approval;
+import "google/protobuf/timestamp.proto";
+import "proto/google/api/annotations.proto";
+option go_package = "proto/transaction/approval";
+
+
+service ApprovalService {
+  rpc GetApprovals(GetApprovalRequest) returns (GetApprovalResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/transaction/approval"
+    };
+  }
+  rpc GetGenerateApproval(GetGenerateApprovalRequest) returns (GetGenerateApprovalResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/transaction/approval-generate"
+    };
+  }
+  rpc SubmitApproval(SubmitApprovalRequest) returns (GetApprovalResponse) {
+    option (google.api.http) = {
+      put: "/api/v1/transaction/approval/{id}"
+      body:"*"
+    };
+  }
+  rpc CreateApproval(SubmitApprovalRequest) returns (GetApprovalResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/transaction/approval"
+      body:"*"
+    };
+  }
+  rpc EmailApprovalRevise(EmailApprovalRequest) returns (EmailApprovalResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/transaction/email-revise"
+      body:"*"
+    };
+  }
+  
+
+}
+
+message ApprovalModel {
+  string id = 1;  
+  bool is_active = 2 [json_name = "is_active"];
+  string created_by = 3 [json_name = "created_by"]; 
+  google.protobuf.Timestamp created_date = 4 [json_name = "created_date"];
+  string modified_by = 5 [json_name = "modified_by"]; 
+  google.protobuf.Timestamp modified_date = 6 [json_name = "modified_date"];
+  string year = 7 [json_name = "year"];
+  string month = 8 [json_name = "month"];
+  string department_id = 9 [json_name = "department_id"];
+  string department_name = 10 [json_name = "department_name"];
+  string outsource_id =  11 [json_name = "outsource_id"];
+  string outsource_name =  12 [json_name = "outsource_name"];
+  string state =  13 [json_name = "state"];
+  string pic =  14 [json_name = "pic"];
+  int32 level =  15 [json_name = "level"];
+  string file_attachment =  16 [json_name = "file_attachment"];
+  repeated RemarksModel remarks =  17 [json_name = "remarks"];
+}
+message RemarksModel {
+  string id = 1;  
+  bool is_active = 2 [json_name = "is_active"];
+  string created_by = 3 [json_name = "created_by"]; 
+  google.protobuf.Timestamp created_date = 4 [json_name = "created_date"];
+  string modified_by = 5 [json_name = "modified_by"]; 
+  google.protobuf.Timestamp modified_date = 6 [json_name = "modified_date"];
+  string remarks_value = 7 [json_name = "remarks_value"];
+  string state_to = 8 [json_name = "state_to"];
+  string state_from = 9 [json_name = "state_from"];
+
+}
+
+message GetApprovalRequest {
+  int32 skip = 1;
+  int32 take = 2;
+  string sort = 3;
+  string filter = 4;
+  int32 level = 5;
+  bool is_outstanding = 6;
+}
+
+
+message GetApprovalResponse {
+  bool isError = 1;
+  string errorMessage = 2;
+  int32 errorCode = 3;
+  repeated ApprovalModel data = 4;
+  int32 countData = 5;
+}
+
+message EmailApprovalRequest {
+  string department_id = 1;
+  string outsource_id = 2;
+  string role = 3;
+  string approval_level = 4;
+}
+
+message EmailApprovalResponse{
+  bool isError = 1;
+  string errorMessage = 2;
+  int32 errorCode = 3;
+}
+
+message GetGenerateApprovalRequest {
+  string department_id = 1;
+  int32 month = 2;
+  int32 year = 3;
+}
+
+message TimecardModel {
+  string id = 1;
+  string employee_id = 2 [json_name = "employee_id"];
+  string employee_name = 3 [json_name = "employee_name"];
+  string nik = 4 [json_name = "nik"];
+  string email = 5 [json_name = "email"];
+  string department_id = 6 [json_name = "department_id"];
+  string department_name = 7 [json_name = "department_name"];
+  string outsource_id = 8 [json_name = "outsource_id"];
+  string outsource_name = 9 [json_name = "outsource_name"];
+  string shift_id = 10 [json_name = "shift_id"];
+  string shift_name = 11 [json_name = "shift_name"];
+  google.protobuf.Timestamp date_in = 12 [json_name = "date_in"];
+  google.protobuf.Timestamp time_in_actual = 13 [json_name = "time_in_actual"];
+  google.protobuf.Timestamp time_in_shift = 14 [json_name = "time_in_shift"];
+  string adjustment_in = 15 [json_name = "adjustment_in"];
+  google.protobuf.Timestamp time_in_final = 16 [json_name = "time_in_final"];
+  string location_in_id = 17 [json_name = "location_in_id"];
+  string location_in_name = 18 [json_name = "location_in_name"];
+  google.protobuf.Timestamp time_out_actual = 19 [json_name = "time_out_actual"];
+  google.protobuf.Timestamp time_out_shift = 20 [json_name = "time_out_shift"];
+  string adjustment_out = 21 [json_name = "adjustment_out"];
+  google.protobuf.Timestamp time_out_final = 22 [json_name = "time_out_final"];
+  string location_out_id = 23 [json_name = "location_out_id"];
+  string location_out_name = 24 [json_name = "location_out_name"];
+  string day_status_actual = 25 [json_name = "day_status_actual"];
+  string day_status_final = 26 [json_name = "day_status_final"];
+  string status_actual_id = 27 [json_name = "status_actual_id"];
+  string status_actual = 28 [json_name = "status_actual"];
+  string status_final_id = 29 [json_name = "status_final_id"];
+  string status_final = 30 [json_name = "status_final"];
+  float jam_kerja = 31 [json_name = "jam_kerja"];
+  float over_time_actual = 32 [json_name = "over_time_actual"];
+  float over_time_final = 33 [json_name = "over_time_final"];
+  float total_actual = 34 [json_name = "total_actual"];
+  float total_final = 35 [json_name = "total_final"];
+  string keterangan = 36 [json_name = "keterangan"];
+  string created_by = 37 [json_name = "created_by"];
+  google.protobuf.Timestamp created_date = 38 [json_name = "created_date"];
+  string modified_by = 39 [json_name = "modified_by"];
+  google.protobuf.Timestamp modified_date = 40 [json_name = "modified_date"];
+  float total_khk_actual = 41 [json_name = "total_khk_actual"];
+  float total_khl_actual = 42 [json_name = "total_khl_actual"];
+  int32 tanggal = 43 [json_name = "tanggal"];
+  string hari = 44 [json_name = "hari"];
+  google.protobuf.Timestamp time_break_in_shift = 45 [json_name = "time_break_in_shift"];
+  google.protobuf.Timestamp time_break_out_shift = 46 [json_name = "time_break_out_shift"];
+  string status_actual_code = 47 [json_name = "status_actual_code"];
+  string status_final_code = 48 [json_name = "status_final_code"];
+  repeated Absence absence_status = 49 [json_name = "absence_status"];
+}
+
+message GetGenerateApprovalResponse {
+  bool isError = 1;
+  string errorMessage = 2;
+  int32 errorCode = 3;
+  repeated GetGenerateApprovalEmployee employee = 4;
+}
+
+
+message GetGenerateApprovalEmployee {
+  bool isError = 1;
+  string errorMessage = 2;
+  int32 errorCode = 3;
+  repeated TimecardModel data = 4;
+  repeated HolidayModel holiday = 5;
+  Rekapitulasi rekapitulasi = 6;
+  Validasi validasi = 7;
+  repeated Status status = 8;
+  repeated MasterStatus master_status = 9;
+}
+
+message HolidayModel {
+  string holiday_name = 1;
+  string holiday_date = 2;
+}
+
+message Rekapitulasi {
+  string total_khk = 1;
+  string total_khl = 2;
+  string total_khk_khl = 3;
+  string total_overtime = 4;
+}
+
+message Validasi {
+  string total_moyo = 1;
+  string total_final = 2;
+  string gap_total = 3;
+  string total_adjustment = 4;
+}
+
+message Status {
+  string field = 1;
+  string value = 2;
+}
+
+message MasterStatus {
+  string code = 1;
+  string value = 2;
+}
+
+message Absence {
+  string code = 1;
+  string field = 2;
+  int32 count = 3;
+}
+message SubmitApprovalRequest {
+  string id =  1;
+  int32 year =  2;
+  int32 month =  3;
+  string department_id =  4;
+  string outsource_id =  5;
+  string remarks =  6;
+  string file_attachment =  7;
+  int32 level =  8;
+  bool is_submit = 9;
+}

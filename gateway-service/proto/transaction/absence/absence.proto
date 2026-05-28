@@ -1,0 +1,103 @@
+syntax = "proto3";
+package absence;
+import "google/protobuf/timestamp.proto";
+import "proto/google/api/annotations.proto";
+option go_package = "proto/transaction/absence";
+
+
+service AbsenceService {
+    rpc GetAbsence(GetAbsenceRequest) returns (GetAbsenceResponse) {
+        option (google.api.http) = {
+          get: "/api/v1/transaction/absence"
+        };
+      }
+      rpc GetAbsenceByID(GetAbsenceByIDRequest) returns (GetAbsenceByIDResponse) {
+        option (google.api.http) = {
+          get: "/api/v1/transaction/absence/{id}"
+        };
+      }
+    rpc CreateAbsence(CreateAbsenceRequest) returns (CreateAbsenceResponse) {
+        option (google.api.http) = {
+          post:"/api/v1/transaction/absence"
+          body:"*"
+        };
+      }
+      rpc UpdateAbsence(UpdateAbsenceRequest) returns(CreateAbsenceResponse) {
+        option (google.api.http) = {
+          put:"/api/v1/transaction/absence/{id}"
+          body:"*"
+        };
+      }
+      rpc DeleteAbsence(DeleteAbsenceRequest) returns(CreateAbsenceResponse) {
+        option (google.api.http) = {
+          put:"/api/v1/transaction/absence"
+          body:"*"
+        };
+      }
+}
+
+message AbsenceModel {
+  string id = 1;  
+  string employee_id = 2 [json_name = "employee_id"];
+  string employee_name = 3 [json_name = "employee_name"];
+  string nik = 4 [json_name = "nik"];
+  string remarks_id = 5 [json_name = "remarks_id"];
+  string remarks = 6 [json_name = "remarks"];
+  string absence_start_date = 7 [json_name = "absence_start_date"];
+  string absence_end_date = 8 [json_name = "absence_end_date"];
+  bool is_active = 9 [json_name = "is_active"];
+  google.protobuf.Timestamp created_date = 10 [json_name = "created_date"];
+  string created_by = 11 [json_name = "created_by"];
+  google.protobuf.Timestamp modified_date = 12 [json_name = "modified_date"];
+  string modified_by = 13 [json_name = "modified_by"];  
+}
+
+
+message GetAbsenceRequest {
+  int32 skip = 1;
+  int32 take = 2;
+  string filter = 3;
+  string sort = 4;
+}
+
+message GetAbsenceByIDRequest {
+  string id = 1;
+}
+
+message DeleteAbsenceRequest {
+  repeated string id = 1;
+}
+
+message CreateAbsenceRequest {
+  string employee_id = 1 [json_name = "employee_id"];
+  string remarks_id = 2 [json_name = "remarks_id"];
+  string absence_start_date = 3 [json_name = "absence_start_date"];
+  string absence_end_date = 4 [json_name = "absence_end_date"];
+}
+message UpdateAbsenceRequest {  
+  string id = 1;  
+  string employee_id = 2 [json_name = "employee_id"];
+  string remarks_id = 3 [json_name = "remarks_id"];
+  string absence_start_date = 4 [json_name = "absence_start_date"];
+  string absence_end_date = 5 [json_name = "absence_end_date"];
+}
+
+message GetAbsenceResponse {
+  bool isError = 1;
+  string errorMessage = 2;
+  int32 errorCode = 3;
+  repeated AbsenceModel data = 4;
+  int32 countData = 5;
+}
+message GetAbsenceByIDResponse {
+  bool isError = 1;
+  string errorMessage = 2;
+  int32 errorCode = 3;
+  AbsenceModel data = 4;
+}
+message CreateAbsenceResponse {
+  bool isError = 1;
+  string errorMessage = 2;
+  int32 errorCode = 3;
+  GetAbsenceByIDRequest data = 4;
+}

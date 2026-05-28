@@ -1,0 +1,7 @@
+# don't commit the service binary to vcs
+.env
+static
+__debug*
+service.json
+req
+*.xlsx

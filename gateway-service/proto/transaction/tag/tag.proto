@@ -1,0 +1,66 @@
+syntax = "proto3";
+package tag;
+import "google/protobuf/timestamp.proto";
+option go_package = "proto/transaction/tag";
+import "proto/google/api/annotations.proto";
+
+service TagService {
+  rpc GetTag(GetTagRequest) returns (GetTagResponse) {
+    option (google.api.http) = {
+      get:"/api/v1/transaction/tag"
+    };
+  }
+  rpc CreateTag(MutationTagRequest) returns (MutationTagResponse) {
+    option (google.api.http) = {
+      post:"/api/v1/transaction/tag"
+      body:"*"
+    };
+  }
+  rpc DeleteTag(MutationTagRequest) returns (MutationTagResponse) {
+    option (google.api.http) = {
+      post:"/api/v1/transaction/delete-tag"
+      body:"*"
+    };
+  }
+}
+
+message MutationTagRequest {
+  string rfid_id = 1 [json_name = "rfid_id"];
+  string employee_id = 2 [json_name = "employee_id"];
+  string reader_id = 3 [json_name ="reader_id"];
+  google.protobuf.Timestamp check_in = 4 [json_name = "check_in"];
+  google.protobuf.Timestamp check_out = 5 [json_name = "check_out"];
+}
+message MutationTagResponse {
+  bool isError = 1;
+  string errorMessage = 2;
+  int32 errorCode = 3;
+  TagByIDResponse data = 4;
+}
+
+message GetTagRequest {
+  string nik = 1 [json_name = "nik"];;
+  int32 skip = 2 [json_name = "skip"];;
+  int32 take= 3 [json_name = "take"];;
+  string sort= 4 [json_name = "sort"];;
+  string filter= 5 [json_name = "filter"];;
+}
+
+message GetTagResponse {
+  bool isError = 1;
+  string errorMessage = 2;
+  int32 errorCode = 3;
+  repeated TagDataResponse data = 4;
+  int32 countData = 5;
+}
+
+message TagByIDResponse {
+  string id = 1;
+}
+
+message TagDataResponse {
+  string nik = 1 [json_name = "nik"];
+  string employee_name = 2 [json_name = "employee_name"];
+  string location_name = 3 [json_name ="location_name"];    
+  string check_in = 4 [json_name ="check_in"];    
+}

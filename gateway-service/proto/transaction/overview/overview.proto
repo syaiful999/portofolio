@@ -1,0 +1,57 @@
+syntax = "proto3";
+package overview;
+import "proto/google/api/annotations.proto";
+option go_package = "proto/transaction/overview";
+
+
+service OverviewService {
+  rpc GetOverview(GetOverviewRequest) returns (GetOverviewResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/transaction/overview"
+    };
+  }
+}
+
+
+message OverviewModel {
+  string id = 1;  
+  string employee_name = 2 [json_name = "employee_name"];
+  string nik = 3 [json_name = "nik"];
+  DayModel monday = 4 [json_name = "monday"];
+  DayModel tuesday = 5 [json_name = "tuesday"];
+  DayModel wednesday = 6 [json_name = "wednesday"];
+  DayModel thursday = 7 [json_name = "thursday"];
+  DayModel friday = 8 [json_name = "friday"];
+  DayModel saturday = 9 [json_name = "saturday"];
+  DayModel sunday = 10 [json_name = "sunday"];
+}
+
+
+
+message DayModel {
+  string id = 1;  
+  string shift_name = 3 [json_name = "shift_name"]; 
+  string shift_start = 4 [json_name = "shift_start"]; 
+  string shift_end = 5 [json_name = "shift_end"]; 
+  string shift_type = 6 [json_name = "shift_type"]; 
+  string assignment_start = 7 [json_name = "assignment_start"]; 
+  string assignment_end = 8 [json_name = "assignment_end"]; 
+
+}
+
+message GetOverviewRequest {
+  int32 skip = 1;
+  int32 take = 2;
+  string filter = 3;
+  string sort = 4;
+  string week_start = 5;
+  string week_end = 6;
+}
+
+message GetOverviewResponse {
+  bool isError = 1;
+  string errorMessage = 2;
+  int32 errorCode = 3;
+  repeated OverviewModel data = 4;
+  int32 countData = 5;
+}

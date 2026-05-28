@@ -1,0 +1,11 @@
+services:
+  protogen:
+    build:
+      context: "."
+    working_dir: "/source"
+    volumes:
+      - "../:/source"
+    environment:
+      - TARGET_DIR=proto  # Default value
+    command: >
+      sh -c "find $${TARGET_DIR} -name '*.proto' -exec protoc --proto_path=. --go-grpc_out . --go_out=:. --grpc-gateway_out=logtostderr=true:. {} +"

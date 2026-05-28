@@ -1,0 +1,106 @@
+syntax = "proto3";
+package mcu;
+option go_package = "proto/transaction/mcu";
+import "proto/google/api/annotations.proto";
+
+service McuService {
+    rpc GetEmployeeMCUSummary(GetEmployeeMCUSummaryRequest) returns (GetEmployeeMCUSummaryResponse) {
+    option (google.api.http) = {
+      get:"/api/v1/transaction/employee-mcu-summary"
+    };
+  }
+    rpc GetEmployeeMCUSummaryByEmployeeID(GetEmployeeMCURequest) returns (GetEmployeeMCUSummaryResponse) {
+    option (google.api.http) = {
+      get:"/api/v1/transaction/employee-mcu-summary/{id}"
+    };
+  }
+    rpc GetEmployeeMCUList(GetEmployeeMCURequest) returns (GetEmployeeMCUResponse) {
+    option (google.api.http) = {
+      get:"/api/v1/transaction/employee-mcu"
+    };
+  }
+  rpc GetEmployeeMCUDetail(GetEmployeeMCURequest) returns (GetEmployeeMCUResponse) {
+    option (google.api.http) = {
+      get:"/api/v1/transaction/employee-mcu/{id}"
+    };
+  }
+  rpc GetEmployeeMCUListExport(GetEmployeeMCURequest) returns (GetEmployeeMCUExportResponse) {
+    option (google.api.http) = {
+      get:"/api/v1/transaction/employee-mcu-export"
+    };
+  }
+  rpc GetEmployeeMCUDetailExport(GetEmployeeMCURequest) returns (GetEmployeeMCUExportResponse) {
+    option (google.api.http) = {
+      get:"/api/v1/transaction/employee-mcu-export/{id}"
+    };
+  }
+}
+
+message GetEmployeeMCUSummaryRequest {
+  int32 periode = 1 [json_name="periode"];
+  string department_id = 2 [json_name="department_id"];
+  string outsource_id = 3 [json_name="outsource_id"];
+}
+
+message GetEmployeeMCURequest {
+  int32 skip = 1;
+  int32 take = 2;
+  string filter = 3;
+  string sort = 4;
+  string event_type= 5 [json_name = "event_type"] ;
+  string id = 6 [json_name="id"];
+}
+
+message GetEmployeeMCUSummaryResponse {
+  bool isError = 1;
+  string errorMessage = 2;
+  int32 errorCode = 3;
+  MCUSummaryModel data = 4;
+}
+
+message MCUSummaryModel {
+  int32 fit = 1 [json_name="fit"];
+  int32 fit_with_note = 2 [json_name="fit_with_note"];
+  int32 unfit = 3 [json_name="unfit"];
+  int32 fit_follow_up = 4 [json_name="fit_follow_up"];
+  int32 fit_with_note_follow_up = 5 [json_name="fit_with_note_follow_up"];  
+  int32 unfit_follow_up = 6 [json_name="unfit_follow_up"];  
+  int32 empty_follow_up = 7 [json_name="empty_follow_up"];  
+}
+
+message EmptyRequest {}
+
+message GetEmployeeMCUResponse {
+  bool isError = 1;
+  string errorMessage = 2;
+  int32 errorCode = 3;
+  repeated MCUModel data = 4; 
+  int32 countData = 5;
+}
+
+message MCUModel{
+  string nik = 1 [json_name="nik"];
+  string employee_id = 2 [json_name="employee_id"];
+  string employee_name = 3 [json_name="employee_name"];
+  string status = 4 [json_name="status"];
+  string status_followup = 5 [json_name="status_followup"];
+  string department_name = 6 [json_name="department_name"];   
+  string outsource_name = 7 [json_name="outsource_name"];   
+  string mcu_date = 8 [json_name="mcu_date"];   
+  string periode = 9 [json_name="periode"];   
+  string health_description = 10 [json_name="health_description"];
+  string mcu_url = 11 [json_name="mcu_url"];
+  string mcu_followup_url = 12 [json_name="mcu_followup_url"];
+}
+
+message GetEmployeeMCUExportResponse {
+  bool isError = 1;
+  string errorMessage = 2;
+  int32 errorCode = 3;
+  ExportResponse data = 4;
+}
+message ExportResponse {
+  bytes file_content = 1; 
+  string file_name = 2;   
+  string mime_type = 3;   
+}

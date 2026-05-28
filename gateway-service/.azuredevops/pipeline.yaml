@@ -1,0 +1,224 @@
+trigger:
+  - master
+
+pool:
+  vmImage: ubuntu-20.04
+
+variables:
+  imageRepository: 'code-base/api-gateway'
+  containerRegistry: '668053314939.dkr.ecr.ap-southeast-1.amazonaws.com'
+
+stages:
+- stage: UpdateBuildNumber
+  variables:
+    - group: semver
+  jobs:
+    - job: CalculateVersion
+      displayName: Tagging release version
+      steps:
+        # Update Build.BuildNumber to use SemVer, as by default it uses FullSemVer
+        - pwsh: |
+            Write-Host "##vso[build.updatebuildnumber]$(gitversion_api_gateway)"
+          displayName: Update Build.BuildNumber
+
+- stage: BuildPush
+  dependsOn:
+  - UpdateBuildNumber
+  condition: succeeded('UpdateBuildNumber')
+  jobs:
+    - job: BuildAndPushImageDocker
+      displayName: Build Image Docker
+      steps:
+          # Checkout with persist credentials
+        - checkout: self
+          persistCredentials: true
+          displayName: "Pull Latest Master"
+        
+        - task: Docker@2
+          displayName: Build Docker
+          inputs:
+            command: build
+            repository: $(containerRegistry)/$(imageRepository)
+            buildContext: '$(Build.SourcesDirectory)'
+            tags: |
+              v$(Build.BuildNumber)
+
+        - task: ECRPushImage@1
+          displayName: Push image to ECR
+          inputs:
+            awsCredentials: 'ECR_PushPull'
+            regionName: 'ap-southeast-1'
+            imageSource: 'imagename'
+            sourceImageName: $(containerRegistry)/$(imageRepository)
+            sourceImageTag: v$(Build.BuildNumber)
+            pushTag: v$(Build.BuildNumber)
+            repositoryName: $(imageRepository)
+
+        - task: ECRPushImage@1
+          displayName: Push image to ECR latest version
+          inputs:
+            awsCredentials: 'ECR_PushPull'
+            regionName: 'ap-southeast-1'
+            imageSource: 'imagename'
+            sourceImageName: $(containerRegistry)/$(imageRepository)
+            sourceImageTag: v$(Build.BuildNumber)
+            pushTag: latest
+            repositoryName: $(imageRepository)
+ 
+- stage: DeployToEKSenvDev
+  dependsOn:
+  - BuildPush
+  condition: succeeded('BuildPush')
+  jobs:
+    - job: DeployToEKS
+      displayName: Deploy Image to Env Dev
+      variables:
+        - group: semver
+      pool:
+        vmImage: windows-2019
+      steps:
+        - checkout: self
+          persistCredentials: true
+          displayName: "Pull Latest Master"
+
+        - script: |
+            cd $(Build.SourcesDirectory)/.azuredevops
+            sed -i 's/"latest"/v$(Build.BuildNumber)/g' helmvalue_dev.yaml
+          displayName: "rewrite versioning image k8s stage dev"
+          
+        - task: AWSCLI@1
+          displayName: Generate kubeconfig
+          inputs:
+            awsCredentials: 'AdminXTI-APPS'
+            regionName: 'ap-southeast-1'
+            awsCommand: 'eks'
+            awsSubCommand: 'update-kubeconfig'
+            awsArguments: '--name xti-app_nonprod'
+        
+        - task: aws-eks-authenticator@0
+          displayName: Generate Credential AWS
+          inputs:
+            clusterName: 'xti-app'
+            awsCredentials: 'EKS-XTI-APPS'
+            regionName: 'ap-southeast-1'
+            
+        - task: HelmInstaller@0
+          displayName: "Install Helm"
+          inputs:
+            helmVersion: '2.14.1'
+            installKubectl: false
+
+        - task: CmdLine@2
+          displayName: "push to public helm repo"
+          inputs:
+            script: |
+              echo build $(Build.BuildNumber)
+              cd $(Build.SourcesDirectory)/.azuredevops
+              helm repo add code-base https://charts.xti.app/code-base --username admin --password $(helmpass)
+              cat helmvalue_dev.yaml
+              helm upgrade --install api-gateway-dev -f helmvalue_dev.yaml -n codebase --version 1.5.7 code-base/api-gateway
+
+- stage: CreateTagVersion
+  dependsOn:
+  - DeployToEKSenvDev
+  condition: succeeded('DeployToEKSenvDev')
+  jobs:
+    - job: pushToRepo
+      displayName: Update Git Tag Version
+      steps:
+        - checkout: self
+          persistCredentials: true
+          displayName: "Pull Latest Master"
+
+        - task: PowerShell@2
+          displayName: Adding git release tag
+          inputs:
+            targetType: inline
+            script: |
+              Write-Host "Configuring git author info.." -ForegroundColor Cyan
+              git config user.email "Azure DevOps pipeline"
+              git config user.name "devops@xapiens.id"
+              Write-Host "Adding git tag for release $(Build.BuildNumber).." -ForegroundColor Cyan
+              git tag -a $("$(Build.BuildNumber)") -m $("Release $(Build.BuildNumber)")
+              Write-Host "Doing git push.." -ForegroundColor Cyan
+              git push --tags
+              Write-Host "Done." -ForegroundColor Cyan
+
+- stage: CreateReleaseNotes
+  dependsOn:
+  - CreateTagVersion
+  condition: succeeded('CreateTagVersion')
+  jobs:
+    ## Job to create release notes file and publish it to the wiki
+    - job: CreateReleaseNotes
+      displayName: Creating release notes
+      steps:
+        # Generates a release notes file
+        - task: XplatGenerateReleaseNotes@3
+          displayName: "Generate release notes"
+          inputs:
+            outputfile: '$(System.DefaultWorkingDirectory)/releasenotes.md'
+            templateLocation: File
+            templatefile: ".azuredevops/release_notes.md"
+            dumpPayloadToConsole: false
+            dumpPayloadToFile: false
+            replaceFile: True
+            getParentsAndChildren: False
+            getAllParents: False
+            getIndirectPullRequests: False
+            stopOnError: True
+            considerPartiallySuccessfulReleases: False
+
+        - task: InstallSSHKey@0
+          displayName: "Install ssh-key"
+          inputs:
+            knownHostsEntry: 'ssh.dev.azure.com'
+            sshPassphrase: $(pass)
+            sshKeySecureFile: id_rsa.devops
+
+        - task: CmdLine@2
+          displayName: "push to wiki"
+          inputs:
+            script: |
+              echo build $(Build.BuildNumber) 
+              echo $(Build.DefinitionName)
+              mkdir -p $(System.DefaultWorkingDirectory)/wiki_releasenotes
+              git clone git@ssh.dev.azure.com:v3/indikaenergygroup/XTI%20Skeleton%20Code/XTI-Skeleton-Code.wiki $(System.DefaultWorkingDirectory)/wiki_releasenotes
+              cd $(System.DefaultWorkingDirectory)/wiki_releasenotes
+              git fetch --all
+              cat $(System.DefaultWorkingDirectory)/releasenotes.md Api-Gateway.md >> tempfile
+              mv tempfile Api-Gateway.md
+              git config user.email "devops@xapiens.id"
+              git config user.name "devopsxti"
+              git add .
+              git commit -m "Add release notes $(Build.BuildNumber)"
+              git push origin wikiMaster
+
+- stage: CreateArtifacCD
+  dependsOn:
+  - CreateReleaseNotes
+  condition: succeeded('CreateReleaseNotes')
+  jobs:
+    - job: CreateArtifactForCD
+      displayName: Create Artifact
+      steps:
+        - checkout: self
+          persistCredentials: true
+          displayName: "Pull Latest Master"
+          
+        - script: |
+            cd $(Build.SourcesDirectory)/.azuredevops
+            sed -i 's/"latest"/v$(Build.BuildNumber)/g' helmvalue_uat.yaml
+            sed -i 's/"latest"/v$(Build.BuildNumber)/g' helmvalue_prod.yaml
+          displayName: "rewrite versioning image k8s"
+        
+        - task: CopyFiles@2
+          inputs:
+            SourceFolder: '$(Build.SourcesDirectory)'
+            Contents: '**'
+            TargetFolder: '$(Build.ArtifactDevDirectory)'
+
+        - task: PublishBuildArtifacts@1
+          inputs:
+            PathtoPublish: '$(Build.ArtifactDevDirectory)'
+            ArtifactName: '_api-gateway'

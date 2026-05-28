@@ -1,0 +1,44 @@
+syntax = "proto3";
+package attendancemonitoring;
+import "google/protobuf/timestamp.proto";
+import "proto/google/api/annotations.proto";
+option go_package = "proto/transaction/attendancemonitoring";
+
+service AttendanceMonitoringService {
+  rpc GetAttendanceMonitorings(GetAttendanceMonitoringRequest) returns (GetAttendanceMonitoringResponse) {
+    option (google.api.http) = {
+        get: "/api/v1/transaction/attendancemonitoring"
+      };
+  }
+}
+
+message AttendanceMonitoringModel {
+  string id = 1;
+  string employee_name = 2 [json_name = "employee_name"];
+  string nik = 3 [json_name = "nik"];
+  string picture = 4 [json_name = "picture"];
+  string department_name = 5 [json_name = "department_name"];
+  string company_name = 6 [json_name = "company_name"];  
+  string reader_name = 7 [json_name = "reader_name"];  
+  google.protobuf.Timestamp check_in = 8 [json_name = "check_in"];
+  google.protobuf.Timestamp check_out = 9 [json_name = "check_out"];
+  google.protobuf.Timestamp created_date = 10 [json_name = "created_date"];
+}
+
+
+message GetAttendanceMonitoringRequest {
+  int32 skip = 1;
+  int32 take = 2;
+  string filter = 3;
+  string sort = 4;
+}
+
+
+message GetAttendanceMonitoringResponse {
+  bool isError = 1;
+  string errorMessage = 2;
+  int32 errorCode = 3;
+  repeated AttendanceMonitoringModel lastData = 4; 
+  repeated AttendanceMonitoringModel data = 5;
+  int32 countData = 6;
+}

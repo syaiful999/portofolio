@@ -1,0 +1,103 @@
+# Default values for api-gateway.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 1
+
+image:
+  repository: 668053314939.dkr.ecr.ap-southeast-1.amazonaws.com/code-base/api-gateway
+  pullPolicy: IfNotPresent
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: "latest"
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+
+podAnnotations:
+  vault.hashicorp.com/agent-inject: "true"
+  vault.hashicorp.com/agent-init-first: 'true'
+  vault.hashicorp.com/agent-inject-secret-.env: secrets/dev/codebase/api-gateway
+  vault.hashicorp.com/agent-inject-template-.env: |-
+    {{ with secret "secrets/dev/codebase/api-gateway" -}}
+      MICRO_CLIENT={{ .Data.data.MICRO_CLIENT }}
+      AUTH_SERVICE_HOST={{ .Data.data.AUTH_SERVICE_HOST }}
+      MASTER_DATA_SERVICE_HOST={{ .Data.data.MASTER_DATA_SERVICE_HOST }}
+      ROLES_SERVICE_HOST={{ .Data.data.ROLES_SERVICE_HOST }}
+      USER_SERVICE_HOST={{ .Data.data.USER_SERVICE_HOST }}
+    {{ end -}}
+  vault.hashicorp.com/role: codebase-api-gateway
+
+podSecurityContext: {}
+  # fsGroup: 2000
+
+securityContext: {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+
+service:
+  type: ClusterIP
+  port: 80
+
+grpc:
+  name: grpc
+  containerPort: 8080
+
+ingress:
+  enabled: true
+  className: "nginx-internal"
+  annotations: {}
+    # kubernetes.io/ingress.class: nginx
+    # kubernetes.io/tls-acme: "true"
+  hosts:
+    - host: gw-codebase-d.xapiens.id
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+  tls:
+   - secretName: xapiens-id
+     hosts:
+       - gw-codebase-d.xapiens.id
+
+application:
+  enabled: true
+  env:
+    - name: HELM_TEMPLATE_NAME
+      value: api-gateway
+
+resources:
+  limits:
+    cpu: 100m
+    memory: 64Mi
+  requests:
+    cpu: 100m
+    memory: 32Mi
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 5
+  targetCPUUtilizationPercentage: 80
+  targetMemoryUtilizationPercentage: 80
+
+nodeSelector: 
+  enabled: false
+  select:
+    node: "default"
+
+tolerations: []
+
+affinity: {}
