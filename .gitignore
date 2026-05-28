@@ -1,0 +1,28 @@
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Environment
+.env
+*.env.local
+
+# Go
+vendor/
+
+# Generated protobuf
+*.pb.go
+*.pb.gw.go
+*_grpc.pb.go
+*.pb.micro.go
+
+# Build
+bin/
+dist/
+coverage.out
+
+# Azure DevOps (not used)
+.azuredevops/

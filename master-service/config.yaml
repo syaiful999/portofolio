@@ -1,24 +1,24 @@
---- 
+---
 config:
   service:
-    name: "xti-roles-service-go"   
+    name: "master-service"
     version: 1.0.0
-    address: localhost 
+    address: localhost
     port: 8095
-  hosts: 
-    cache: 
-      address: "10.0.0.2"
-      port: 6379
-    database: 
+  hosts:
+    cache:
       address: "localhost"
-      name: penduduk
+      port: 6379
+    database:
+      address: "localhost"
+      name: master_db
       driver: postgre
-      password: root
+      password: your_password
       port: 5432
-      username: postgres
+      username: your_username
     broker:
       driver: "nats"
       address: "127.0.0.1"
       port: 4222
-      username: "root"
+      username: ""
       password: ""
