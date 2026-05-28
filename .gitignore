@@ -13,12 +13,6 @@ Thumbs.db
 # Go
 vendor/
 
-# Generated protobuf
-*.pb.go
-*.pb.gw.go
-*_grpc.pb.go
-*.pb.micro.go
-
 # Build
 bin/
 dist/

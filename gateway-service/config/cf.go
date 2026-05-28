@@ -23,13 +23,7 @@ type Service struct {
 }
 
 type Services struct {
-	AuthURL        string `yaml:"auth_url" envconfig:"AUTH_SERVICE_HOST"`
-	UserURL        string `yaml:"user_url" envconfig:"USER_SERVICE_HOST"`
-	MasterDataURL  string `yaml:"master_data_url" envconfig:"MASTER_DATA_SERVICE_HOST"`
-	TransactionURL string `yaml:"transaction_url" envconfig:"TRANSACTION_SERVICE_HOST"`
-	MailURL        string `yaml:"mail_url" envconfig:"MAIL_SERVICE_HOST"`
-	RolesURL       string `yaml:"roles_url" envconfig:"ROLES_SERVICE_HOST"`
-	BucketURL      string `yaml:"bucket_url" envconfig:"BUCKET_SERVICE_HOST"`
+	MasterDataURL string `yaml:"master_data_url" envconfig:"MASTER_DATA_SERVICE_HOST"`
 }
 
 type Hosts struct {

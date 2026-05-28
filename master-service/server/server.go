@@ -5,22 +5,8 @@ import (
 	"log"
 	"moyo-master-service/config"
 	"moyo-master-service/database"
-	"moyo-master-service/pkg/department"
-	"moyo-master-service/pkg/departmentdetail"
-	employee "moyo-master-service/pkg/employee"
-	employeeProto "moyo-master-service/pkg/employee/proto"
 	enum "moyo-master-service/pkg/enum"
 	enumProto "moyo-master-service/pkg/enum/proto"
-	"moyo-master-service/pkg/jobcompetency"
-	"moyo-master-service/pkg/jobdescription"
-	"moyo-master-service/pkg/jobfamily"
-	"moyo-master-service/pkg/kelurahan"
-	menu "moyo-master-service/pkg/menu"
-	menuProto "moyo-master-service/pkg/menu/proto"
-	"moyo-master-service/pkg/outsource"
-	"moyo-master-service/pkg/role"
-	"moyo-master-service/pkg/section"
-	"moyo-master-service/pkg/shifttemplate"
 	user "moyo-master-service/pkg/user"
 	userProto "moyo-master-service/pkg/user/proto"
 	"strings"
@@ -36,17 +22,13 @@ import (
 )
 
 type Factory struct {
-	EnumHandler     enum.IEnumHandler
-	UserHandler     user.IUserHandler
-	EmployeeHandler employee.IEmployeeHandler
-	MenuHandler     menu.IMenuHandler
+	EnumHandler enum.IEnumHandler
+	UserHandler user.IUserHandler
 }
 
 func RegisterHandler(srv micro.Service, f Factory) error {
 	enumProto.RegisterEnumServiceHandler(srv.Server(), f.EnumHandler)
 	userProto.RegisterUserServiceHandler(srv.Server(), f.UserHandler)
-	employeeProto.RegisterEmployeeServiceHandler(srv.Server(), f.EmployeeHandler)
-	menuProto.RegisterMenuServiceHandler(srv.Server(), f.MenuHandler)
 
 	if err := srv.Run(); err != nil {
 		return err
@@ -70,37 +52,14 @@ func InitFactory(factory *Factory, conf config.Config) error {
 		return err
 	}
 
-	userRepository := user.NewUserRepository(dbConn)
 	enumRepository := enum.NewEnumRepository(dbConn)
-	roleRepository := role.NewRoleRepository(dbConn)
-	menuRepository := menu.NewMenuRepository(dbConn)
-	employeeRepository := employee.NewEmployeeRepository(dbConn)
-
-	departmentRepository := department.NewDepartmentRepository(dbConn)
-	departmentDetailRepository := departmentdetail.NewDepartmentDetailRepository(dbConn)
-	outsourceRepository := outsource.NewOutsourceRepository(dbConn)
-	sectionRepository := section.NewSectionRepository(dbConn)
-	jobFamilyRepository := jobfamily.NewJobFamilyRepository(dbConn)
-	jobDescriptionRepository := jobdescription.NewJobDescriptionRepository(dbConn)
-	jobCompetencyRepository := jobcompetency.NewJobCompetencyRepository(dbConn)
-	shiftTemplateRepository := shifttemplate.NewShiftTemplateRepository(dbConn)
-	kelurahanRepository := kelurahan.NewKelurahanRepository(dbConn)
+	userRepository := user.NewUserRepository(dbConn)
 
 	enumUsecase := enum.NewUseCaseEnum(enumRepository)
 	userUsecase := user.NewUseCaseUser(userRepository, conf)
-	menuUsecase := menu.NewUseCaseMenu(menuRepository)
-	employeeUsecase := employee.NewUseCaseEmployee(
-		employeeRepository, enumRepository, userRepository, roleRepository,
-		departmentRepository, departmentDetailRepository, outsourceRepository,
-		sectionRepository, jobFamilyRepository, jobDescriptionRepository,
-		jobCompetencyRepository, shiftTemplateRepository, kelurahanRepository,
-		conf, dbConn,
-	)
 
 	factory.EnumHandler = enum.NewEnumHandler(enumUsecase)
 	factory.UserHandler = user.NewUserHandler(userUsecase)
-	factory.EmployeeHandler = employee.NewEmployeeHandler(employeeUsecase)
-	factory.MenuHandler = menu.NewMenuHandler(menuUsecase)
 
 	return nil
 }

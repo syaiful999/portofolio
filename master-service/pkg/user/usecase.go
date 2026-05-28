@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"moyo-master-service/config"
-	mail "moyo-master-service/pkg/mail"
 	pb "moyo-master-service/pkg/user/proto"
 	"moyo-master-service/utils"
 	"net/http"
@@ -202,10 +201,10 @@ func (s *UseCase) UserForgotPassword(ctx context.Context, req *pb.ForgotPassword
 
 	if user.IsStatus {
 		linkActivation := fmt.Sprintf(`%s/reset-password?id=%s&userId=%s`, s.config.Hosts.Services.Web, idRedirect, user.ID.String())
-		mail.SendMailForgotPassword(s.config.Hosts.Services.Mail, req.Email, user.UserName, req.Email, user.ID.String(), linkActivation)
+		utils.PushLogf("", "UserForgotPassword", fmt.Sprintf("Reset password link: %s", linkActivation))
 	} else {
 		linkActivation := fmt.Sprintf(`%s/generate-password?id=%s&userId=%s`, s.config.Hosts.Services.Web, idRedirect, user.ID.String())
-		mail.SendMailActivateUser(s.config.Hosts.Services.Mail, req.Email, user.UserName, req.Email, user.ID.String(), linkActivation)
+		utils.PushLogf("", "UserForgotPassword", fmt.Sprintf("Activate user link: %s", linkActivation))
 	}
 
 	return nil
@@ -254,7 +253,7 @@ func (s *UseCase) CreateUser(ctx context.Context, req *pb.MutationUserRequest, r
 	}
 
 	linkActivation := fmt.Sprintf(`%s/generate-password?id=%s&userId=%s`, s.config.Hosts.Services.Web, idRedirect, result.ID.String())
-	mail.SendMailActivateUser(s.config.Hosts.Services.Mail, data.Email, data.UserName, data.Email, result.ID.String(), linkActivation)
+	utils.PushLogf("", "CreateUser", fmt.Sprintf("Activate user link: %s", linkActivation))
 
 	res.Data = &pb.GetUserByIDRequest{Id: result.ID.String()}
 	return nil
@@ -302,7 +301,7 @@ func (s *UseCase) UpdateUser(ctx context.Context, req *pb.MutationUserRequest, r
 	}
 	if !result.IsStatus {
 		linkActivation := fmt.Sprintf(`%s/generate-password?id=%s&userId=%s`, s.config.Hosts.Services.Web, idRedirect, result.ID.String())
-		mail.SendMailActivateUser(s.config.Hosts.Services.Mail, data.Email, data.UserName, data.Email, result.ID.String(), linkActivation)
+		utils.PushLogf("", "UpdateUser", fmt.Sprintf("Activate user link: %s", linkActivation))
 	}
 	res.Data = &pb.GetUserByIDRequest{Id: result.ID.String()}
 	return nil

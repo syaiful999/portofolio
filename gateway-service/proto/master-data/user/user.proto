@@ -5,64 +5,62 @@ import "proto/google/api/annotations.proto";
 option go_package = "proto/master-data/user";
 
 service UserService {
-    rpc GetUsers(GetUserRequest) returns (GetUserResponse) {
-        option (google.api.http) = {
-          get: "/api/v1/master-data/user"
-        };
-      }
-      rpc GetUserById(GetUserByIDRequest) returns (GetUserByIDResponse) {
-        option (google.api.http) = {
-          get: "/api/v1/master-data/user/{id}"
-        };
-      }
-
-      rpc UserForgotPassword(ForgotPasswordRequest) returns (MutationUserResponse) {
-        option (google.api.http) = {
-          get: "/api/v1/reset-password/{email}"
-        };
-      }
-      rpc CreateUser(MutationUserRequest) returns (MutationUserResponse) {
-        option (google.api.http) = {
-          post:"/api/v1/master-data/user"
-          body:"*"
-        };
-      }
-      rpc UpdateUser(MutationUserRequest) returns(MutationUserResponse) {
-        option (google.api.http) = {
-          put:"/api/v1/master-data/user/{id}"
-          body:"*"
-        };
-      }
-      rpc UpdateUserPassword(MutationUserRequest) returns(MutationUserResponse) {
-        option (google.api.http) = {
-          put:"/api/v1/master-data/user-password/{id}"
-          body:"*"
-        };
-      }
-      rpc DeleteUser(MutationUserRequest) returns(MutationUserResponse) {
-        option (google.api.http) = {
-          delete:"/api/v1/master-data/user/{id}"
-        };
-      } 
-      rpc GetUserGroupbyRole(GetUserRequest) returns (GetUserGroupByRoleResponse) {
-        option (google.api.http) = {
-          get: "/api/v1/master-data/user-groupby-role"
-        };
-      }
-      rpc ActivateUser(Empty) returns (MutationUserResponse) {
-        option (google.api.http) = {
-          put: "/api/v1/master-data/activate-user"
-        };
-      }
+  rpc GetUsers(GetUserRequest) returns (GetUserResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/master-data/user"
+    };
+  }
+  rpc GetUserById(GetUserByIDRequest) returns (GetUserByIDResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/master-data/user/{id}"
+    };
+  }
+  rpc UserForgotPassword(ForgotPasswordRequest) returns (MutationUserResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/reset-password/{email}"
+    };
+  }
+  rpc CreateUser(MutationUserRequest) returns (MutationUserResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/master-data/user"
+      body: "*"
+    };
+  }
+  rpc UpdateUser(MutationUserRequest) returns (MutationUserResponse) {
+    option (google.api.http) = {
+      put: "/api/v1/master-data/user/{id}"
+      body: "*"
+    };
+  }
+  rpc UpdateUserPassword(MutationUserRequest) returns (MutationUserResponse) {
+    option (google.api.http) = {
+      put: "/api/v1/master-data/user-password/{id}"
+      body: "*"
+    };
+  }
+  rpc DeleteUser(MutationUserRequest) returns (MutationUserResponse) {
+    option (google.api.http) = {
+      delete: "/api/v1/master-data/user/{id}"
+    };
+  }
+  rpc GetUserGroupbyRole(GetUserRequest) returns (GetUserGroupByRoleResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/master-data/user-groupby-role"
+    };
+  }
+  rpc ActivateUser(Empty) returns (MutationUserResponse) {
+    option (google.api.http) = {
+      put: "/api/v1/master-data/activate-user"
+    };
+  }
 }
 
-
 message UserModel {
-  string id = 1;  
+  string id = 1;
   bool is_active = 2 [json_name = "is_active"];
-  string created_by = 3 [json_name = "created_by"]; 
+  string created_by = 3 [json_name = "created_by"];
   google.protobuf.Timestamp created_date = 4 [json_name = "created_date"];
-  string modified_by = 5 [json_name = "modified_by"]; 
+  string modified_by = 5 [json_name = "modified_by"];
   google.protobuf.Timestamp modified_date = 6 [json_name = "modified_date"];
   string user_name = 7 [json_name = "user_name"];
   string email = 8 [json_name = "email"];
@@ -75,12 +73,10 @@ message UserModel {
   string outsource_name = 15 [json_name = "outsource_name"];
   string location_id = 16 [json_name = "location_id"];
   string location_name = 17 [json_name = "location_name"];
-  bool is_deleted = 18 [json_name = "is_deleted"];
+  bool is_status = 18 [json_name = "is_status"];
   string picture = 19 [json_name = "picture"];
   string name = 20 [json_name = "name"];
 }
-
-
 
 message GetUserRequest {
   int32 skip = 1;
@@ -93,9 +89,8 @@ message GetUserByIDRequest {
   string id = 1;
 }
 
-
 message MutationUserRequest {
-  string id = 1;  
+  string id = 1;
   bool is_active = 2 [json_name = "is_active"];
   string user_name = 3 [json_name = "user_name"];
   string email = 4 [json_name = "email"];
@@ -106,8 +101,8 @@ message MutationUserRequest {
   string picture = 9 [json_name = "picture"];
   string picture_name = 10 [json_name = "picture_name"];
   bool is_status = 11 [json_name = "is_status"];
-  string name =  12 [json_name = "name"];
-  string password =  13 [json_name = "password"];
+  string name = 12 [json_name = "name"];
+  string password = 13 [json_name = "password"];
 }
 
 message GetUserResponse {
@@ -117,12 +112,14 @@ message GetUserResponse {
   repeated UserModel data = 4;
   int32 countData = 5;
 }
+
 message GetUserByIDResponse {
   bool isError = 1;
   string errorMessage = 2;
   int32 errorCode = 3;
   UserModel data = 4;
 }
+
 message MutationUserResponse {
   bool isError = 1;
   string errorMessage = 2;
@@ -143,9 +140,8 @@ message UserRoleModel {
   int32 count = 3 [json_name = "count"];
 }
 
-message Empty{}
+message Empty {}
 
 message ForgotPasswordRequest {
-  string email =  1 [json_name = "email"];
-
+  string email = 1 [json_name = "email"];
 }

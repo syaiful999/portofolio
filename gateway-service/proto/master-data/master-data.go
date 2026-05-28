@@ -3,6 +3,7 @@ package masterdata
 import (
 	"context"
 	"moyo-gateway-service/config"
+	enum "moyo-gateway-service/proto/master-data/enum"
 	user "moyo-gateway-service/proto/master-data/user"
 
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
@@ -11,6 +12,10 @@ import (
 
 func Register(ctx context.Context, mux *runtime.ServeMux, opts []grpc.DialOption, conf config.Config) error {
 	masterDataEndpoint := conf.Services.MasterDataURL
+
+	if err := enum.RegisterEnumServiceHandlerFromEndpoint(ctx, mux, masterDataEndpoint, opts); err != nil {
+		return err
+	}
 
 	if err := user.RegisterUserServiceHandlerFromEndpoint(ctx, mux, masterDataEndpoint, opts); err != nil {
 		return err

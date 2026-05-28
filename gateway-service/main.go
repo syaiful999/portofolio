@@ -10,10 +10,7 @@ import (
 	"moyo-gateway-service/middleware"
 	"moyo-gateway-service/pkg/entities"
 	pkglogs "moyo-gateway-service/pkg/logs"
-	authorization "moyo-gateway-service/proto/authorization"
-	mail "moyo-gateway-service/proto/mail"
 	master_data "moyo-gateway-service/proto/master-data"
-	transaction "moyo-gateway-service/proto/transaction"
 	"moyo-gateway-service/utils"
 	"net/http"
 	"strconv"
@@ -87,17 +84,7 @@ func run() error {
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	}
 
-	if err := authorization.Register(ctx, mux, opts, conf); err != nil {
-		return err
-	}
-
 	if err := master_data.Register(ctx, mux, opts, conf); err != nil {
-		return err
-	}
-	if err := transaction.Register(ctx, mux, opts, conf); err != nil {
-		return err
-	}
-	if err := mail.Register(ctx, mux, opts, conf); err != nil {
 		return err
 	}
 

@@ -1,0 +1,75 @@
+syntax = "proto3";
+package enum;
+import "google/protobuf/timestamp.proto";
+import "proto/google/api/annotations.proto";
+option go_package = "proto/master-data/enum";
+
+service EnumService {
+  rpc GetEnums(GetEnumRequest) returns (GetEnumResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/master-data/enum"
+    };
+  }
+  rpc GetEnumById(GetEnumByIDRequest) returns (GetEnumByIDResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/master-data/enum/{id}"
+    };
+  }
+  rpc UpdateEnum(UpdateEnumRequest) returns (UpdateEnumResponse) {
+    option (google.api.http) = {
+      put: "/api/v1/master-data/enum/{id}"
+      body: "*"
+    };
+  }
+}
+
+message EnumModel {
+  string id = 1;
+  string enum_type = 2 [json_name = "enum_type"];
+  string enum_value = 3 [json_name = "enum_value"];
+  string enum_code = 4 [json_name = "enum_code"];
+  bool is_active = 5 [json_name = "is_active"];
+  string created_by = 6 [json_name = "created_by"];
+  google.protobuf.Timestamp created_date = 7 [json_name = "created_date"];
+  string modified_by = 8 [json_name = "modified_by"];
+  google.protobuf.Timestamp modified_date = 9 [json_name = "modified_date"];
+}
+
+message GetEnumRequest {
+  int32 skip = 1;
+  int32 take = 2;
+  string filter = 3;
+  string sort = 4;
+}
+
+message GetEnumByIDRequest {
+  string id = 1;
+}
+
+message UpdateEnumRequest {
+  string id = 1;
+  string enum_type = 2;
+  string enum_value = 3 [json_name = "enum_value"];
+}
+
+message UpdateEnumResponse {
+  bool isError = 1;
+  string errorMessage = 2;
+  int32 errorCode = 3;
+  GetEnumByIDRequest data = 4;
+}
+
+message GetEnumResponse {
+  bool isError = 1;
+  string errorMessage = 2;
+  int32 errorCode = 3;
+  repeated EnumModel data = 4;
+  int32 countData = 5;
+}
+
+message GetEnumByIDResponse {
+  bool isError = 1;
+  string errorMessage = 2;
+  int32 errorCode = 3;
+  EnumModel data = 4;
+}
