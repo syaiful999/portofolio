@@ -1,18 +1,13 @@
 package database
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	"strings"
+	"time"
 
 	_ "github.com/lib/pq"
-)
-
-var (
-	dbConn *sql.DB
-	err    error
-
-	Conn IConnect
 )
 
 type IConnect interface {
@@ -29,6 +24,22 @@ type DB struct {
 	Address  string
 }
 
+type PoolConfig struct {
+	MaxOpenConns    int
+	MaxIdleConns    int
+	ConnMaxLifetime time.Duration
+	ConnMaxIdleTime time.Duration
+}
+
+func DefaultPoolConfig() PoolConfig {
+	return PoolConfig{
+		MaxOpenConns:    100,
+		MaxIdleConns:    10,
+		ConnMaxLifetime: 30 * time.Minute,
+		ConnMaxIdleTime: 5 * time.Minute,
+	}
+}
+
 type Postgre struct {
 	DB
 	SslMode string
@@ -36,15 +47,15 @@ type Postgre struct {
 }
 
 func (m Postgre) Connect() (*sql.DB, error) {
-	dsn := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", m.DB.Address, m.DB.Port, m.DB.User, m.DB.Password, m.DB.Name)
+	dsn := fmt.Sprintf(
+		"host=%s port=%d user=%s password=%s dbname=%s sslmode=disable",
+		m.DB.Address, m.DB.Port, m.DB.User, m.DB.Password, m.DB.Name,
+	)
 	return sql.Open("postgres", dsn)
 }
 
 func InitPostgre(db *DB) *Postgre {
-	init := &Postgre{
-		DB: *db,
-	}
-	return init
+	return &Postgre{DB: *db}
 }
 
 type SqlServer struct {
@@ -52,36 +63,49 @@ type SqlServer struct {
 }
 
 func (m SqlServer) Connect() (*sql.DB, error) {
-	dsn := fmt.Sprintf("server=%s;user id=%s;password=%s;port=%d;database=%s;", m.DB.Host, m.DB.User, m.DB.Password, m.DB.Port, m.DB.Name)
+	dsn := fmt.Sprintf(
+		"server=%s;user id=%s;password=%s;port=%d;database=%s;",
+		m.DB.Host, m.DB.User, m.DB.Password, m.DB.Port, m.DB.Name,
+	)
 	return sql.Open("sqlserver", dsn)
 }
 
 func InitSqlServer(db *DB) *SqlServer {
-	init := &SqlServer{
-		DB: *db,
-	}
-	return init
+	return &SqlServer{DB: *db}
 }
 
 func Connection(db *DB) (*sql.DB, error) {
-	switch s := db.Driver; {
-	case strings.ToLower(s) == "postgre":
-		Conn = InitPostgre(db)
-	case strings.ToLower(s) == "sqlserver":
-		Conn = InitSqlServer(db)
-	}
-	dbConn, err = Conn.Connect()
+	return ConnectionWithPool(db, DefaultPoolConfig())
+}
 
+func ConnectionWithPool(db *DB, pool PoolConfig) (*sql.DB, error) {
+	var conn IConnect
+
+	switch strings.ToLower(db.Driver) {
+	case "postgre", "postgres", "postgresql":
+		conn = InitPostgre(db)
+	case "sqlserver", "mssql":
+		conn = InitSqlServer(db)
+	default:
+		return nil, fmt.Errorf("unsupported database driver: %s", db.Driver)
+	}
+
+	dbConn, err := conn.Connect()
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to open connection: %w", err)
 	}
 
-	if err = dbConn.Ping(); err != nil {
-		return nil, err
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	if err = dbConn.PingContext(ctx); err != nil {
+		return nil, fmt.Errorf("failed to ping database: %w", err)
 	}
 
-	dbConn.SetMaxIdleConns(10)
-	dbConn.SetMaxOpenConns(500)
+	dbConn.SetMaxOpenConns(pool.MaxOpenConns)
+	dbConn.SetMaxIdleConns(pool.MaxIdleConns)
+	dbConn.SetConnMaxLifetime(pool.ConnMaxLifetime)
+	dbConn.SetConnMaxIdleTime(pool.ConnMaxIdleTime)
 
 	return dbConn, nil
 }
